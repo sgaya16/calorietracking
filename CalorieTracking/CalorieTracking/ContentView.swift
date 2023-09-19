@@ -12,7 +12,8 @@ import ConfettiSwiftUI
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @FetchRequest private var caloricInfo: FetchedResults<CaloricInfo>
+    
+    @FetchRequest(sortDescriptors: []) var request: FetchedResults<CaloricInfo>
     
     let calorieIntakeGoal: Int64 = 1200
     @State private var caloricEntity: CaloricInfo?
@@ -24,17 +25,14 @@ struct ContentView: View {
     @State private var showErrorAlert = false
     
     init() {
+        print("init called")
         let timestamp = Date()
-        let startDate = Calendar.current.startOfDay(for: timestamp)
-        
-        _caloricInfo = FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \CaloricInfo.timestamp, ascending: false)], predicate: NSPredicate(format: "timestamp <= %@ AND timestamp >= %@", timestamp as CVarArg, startDate as CVarArg))
-        
-        caloricEntity = caloricInfo.first
-        
-        totalCalories = caloricEntity?.totalCaloricIntake ?? 0
-        setCaloriePercentage()
+        let startDate = Calendar.current.startOfDay(for: Date())
+
+        _request = FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \CaloricInfo.timestamp, ascending: false)], predicate: NSPredicate(format: "timestamp <= %@ AND timestamp >= %@", timestamp as CVarArg, startDate as CVarArg))
     }
     
+   
     var body: some View {
         
             VStack {
@@ -71,10 +69,21 @@ struct ContentView: View {
                 .padding()
   
             }
+            .onAppear {
+                setEntity()
+            }
            // .frame(minHeight: 500)
     }
     
     //add a log that shows cals consumed vs. burned based on input for that day!
+    
+    /*
+     *
+     *
+     Calculation functions to determine caloric information
+     *
+     *
+     */
     
     func setTotalCalories() {
         //if total calories is < 0, send error message
@@ -85,7 +94,7 @@ struct ContentView: View {
         }
         totalCalories += calorieInput
         if(entityExists(id: caloricEntity?.id ?? UUID())) {
-            updateEntity(caloricInfo: (caloricInfo.first)!)
+            updateEntity(caloricInfo: (caloricEntity)!)
         }
         else {
             addEntity()
@@ -102,6 +111,21 @@ struct ContentView: View {
         if (calories >= 1000) {
             triggerConfetti += 1
         }
+    }
+    
+    /*
+     *
+     *
+     CRUD functions to manipulate CaloricInfo entity to core data
+     *
+     *
+     */
+    
+    func setEntity() {
+        caloricEntity = request.first
+
+        totalCalories = caloricEntity?.totalCaloricIntake ?? 0
+        setCaloriePercentage()
     }
     
     func addEntity() {
@@ -154,6 +178,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()//caloriePercentage: 0.5)
+        ContentView()
     }
 }

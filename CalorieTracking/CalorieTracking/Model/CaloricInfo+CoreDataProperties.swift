@@ -17,12 +17,10 @@ extension CaloricInfo {
     }
 
     @NSManaged public var caloricGoal: Int64
-    @NSManaged public var id: UUID?
-    @NSManaged public var timestamp: Date?
+    @NSManaged public var id: UUID
+    @NSManaged public var timestamp: Date
     @NSManaged public var totalCaloricIntake: Int64
 
 }
 
-extension CaloricInfo : Identifiable {
-
-}
+extension CaloricInfo : Identifiable {}

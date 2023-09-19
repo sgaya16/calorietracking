@@ -10,7 +10,4 @@ import Foundation
 import CoreData
 
 
-public class CaloricInfo: NSManagedObject {
-    
-
-}
+public class CaloricInfo: NSManagedObject {}
